@@ -207,42 +207,38 @@ typedef enum
 ///////////////////////
 
 /**
- * Definition of (internal) error codes
+ * Definition of (internal) states and error codes
  */
-typedef enum
-{
-    COAP_ERR_NONE                           = 0,
-    COAP_ERR_HEADER_TOO_SHORT               = 1,
-    COAP_ERR_VERSION_NOT_1                  = 2,
-    COAP_ERR_TOKEN_TOO_SHORT                = 3,
-    COAP_ERR_OPTION_TOO_SHORT_FOR_HEADER    = 4,
-    COAP_ERR_OPTION_TOO_SHORT               = 5,
-    COAP_ERR_OPTION_OVERRUNS_PACKET         = 6,
-    COAP_ERR_OPTION_TOO_BIG                 = 7,
-    COAP_ERR_OPTION_LEN_INVALID             = 8,
-    COAP_ERR_BUFFER_TOO_SMALL               = 9,
-    COAP_ERR_UNSUPPORTED                    = 10,
-    COAP_ERR_OPTION_DELTA_INVALID           = 11,
-    COAP_ERR_OPTION_NOT_FOUND               = 12,
+typedef enum {
+    COAP_SUCCESS                          = 0,
+    COAP_RDY,
+    COAP_ACK_RECV,
+    COAP_ACK_SEND,
+    COAP_ACK_WAIT,
+    COAP_RSP_RECV,
+    COAP_RSP_SEND,
+    COAP_RSP_WAIT,
+    COAP_REQ_RECV,
+    COAP_REQ_SEND,
+    COAP_REQ_WAIT,
+    COAP_ERR                              = 100,
+    COAP_ERR_HEADER_TOO_SHORT,
+    COAP_ERR_VERSION_NOT_1,
+    COAP_ERR_TOKEN_TOO_SHORT,
+    COAP_ERR_OPTION_TOO_SHORT_FOR_HEADER,
+    COAP_ERR_OPTION_TOO_SHORT,
+    COAP_ERR_OPTION_OVERRUNS_PACKET,
+    COAP_ERR_OPTION_TOO_BIG,
+    COAP_ERR_OPTION_LEN_INVALID,
+    COAP_ERR_BUFFER_TOO_SMALL,
+    COAP_ERR_UNSUPPORTED,
+    COAP_ERR_OPTION_DELTA_INVALID,
+    COAP_ERR_OPTION_NOT_FOUND,
     COAP_ERR_REQUEST_NOT_FOUND,
     COAP_ERR_REQUEST_MSGID_MISMATCH,
     COAP_ERR_REQUEST_TOKEN_MISMATCH,
     COAP_ERR_RESPONSE,
-    COAP_ERR_MAX                            = 99,
-} coap_error_t;
-#define COAP_SUCCESS COAP_ERR_NONE  //!< Success return value if no error occured
-
-typedef enum {
-    COAP_STATE_RDY                          = (COAP_ERR_MAX + 1),
-    COAP_STATE_ACK_RECV,
-    COAP_STATE_ACK_SEND,
-    COAP_STATE_ACK_WAIT,
-    COAP_STATE_RSP_RECV,
-    COAP_STATE_RSP_SEND,
-    COAP_STATE_RSP_WAIT,
-    COAP_STATE_REQ_RECV,
-    COAP_STATE_REQ_SEND,
-    COAP_STATE_REQ_WAIT,
+    COAP_ERR_MAX,   // this has to be the last error code
 } coap_state_t;
 
 
@@ -296,7 +292,8 @@ struct coap_resource
  * @param[in] ct Content type given as uint16_t
  * @return array with content type
  */
-#define COAP_SET_CONTENTTYPE(ct)    {((int16_t)ct & 0xFF00) >> 8, ((int16_t)ct & 0x00FF)}
+#define COAP_SET_CONTENTTYPE(ct)    {((int16_t)ct & 0xFF00) >> 8, \
+                                     ((int16_t)ct & 0x00FF)}
 
 /**
  * @brief Get content type
@@ -317,9 +314,11 @@ struct coap_resource
  * @param[in] buflen The lenth of \p buf in bytes.
  * @param[out] pkt The coap_packet_t structure to be filled.
  *
- * @return 0 on success, or the according coap_error_t
+ * @return 0 on success, or the according coap_state_t
  */
-int coap_parse(const uint8_t *buf, const size_t buflen, coap_packet_t *pkt);
+coap_state_t coap_parse(const uint8_t *buf,
+                        const size_t buflen,
+                        coap_packet_t *pkt);
 
 /**
  * @brief Writes CoAP packet/message to transmission buffer
@@ -342,7 +341,7 @@ int coap_parse(const uint8_t *buf, const size_t buflen, coap_packet_t *pkt);
  * token length specified in the buffer that actually holds the
  * tokens
  */
-int coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen);
+coap_state_t coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen);
 
 /**
  * @brief Create CoAP acknowledgement
@@ -356,15 +355,15 @@ int coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen);
  *
  * @return Always returns 0.
  */
-int coap_make_ack(const coap_packet_t *inpkt, coap_packet_t *pkt);
+coap_state_t coap_make_ack(const coap_packet_t *inpkt, coap_packet_t *pkt);
 
 /**
  *
  */
-int coap_make_request(const uint16_t msgid, const coap_buffer_t* tok,
-                      const coap_resource_t *resource,
-                      const uint8_t *content, const size_t content_len,
-                      coap_packet_t *pkt);
+coap_state_t coap_make_request(const uint16_t msgid, const coap_buffer_t* tok,
+                               const coap_resource_t *resource,
+                               const uint8_t *content, const size_t content_len,
+                               coap_packet_t *pkt);
 
 /**
  * @brief Create a CoAP response packet
@@ -384,12 +383,14 @@ int coap_make_request(const uint16_t msgid, const coap_buffer_t* tok,
  * @return 0 on success, or COAP_ERR_BUFFER_TOO_SMALL if the length of the
  * buffer pointed to by scratch is smaller than 2.
  */
-int coap_make_response(const uint16_t msgid, const coap_buffer_t* tok,
-                       const coap_msgtype_t msgtype,
-                       const coap_responsecode_t rspcode,
-                       const uint8_t *content_type,
-                       const uint8_t *content, const size_t content_len,
-                       coap_packet_t *pkt);
+coap_state_t coap_make_response(const uint16_t msgid,
+                                const coap_buffer_t* tok,
+                                const coap_msgtype_t msgtype,
+                                const coap_responsecode_t rspcode,
+                                const uint8_t *content_type,
+                                const uint8_t *content,
+                                const size_t content_len,
+                                coap_packet_t *pkt);
 
 /**
  * @brief Handle incoming CoAP request
@@ -405,14 +406,15 @@ int coap_make_response(const uint16_t msgid, const coap_buffer_t* tok,
  *
  * @return 0 on success, or a reasonable error code on failure.
  */
-int coap_handle_request(coap_resource_t *resources,
-                        const coap_packet_t *inpkt,
-                        coap_packet_t *pkt);
+coap_state_t coap_handle_request(coap_resource_t *resources,
+                                 const coap_packet_t *inpkt,
+                                 coap_packet_t *pkt);
 
-int coap_handle_response(coap_resource_t *resources,
-                        const coap_packet_t *reqpkt,
-                        coap_packet_t *rsppkt);
-int coap_handle_packet();
+coap_state_t coap_handle_response(coap_resource_t *resources,
+                                  const coap_packet_t *reqpkt,
+                                  coap_packet_t *rsppkt);
+
+coap_state_t coap_handle_packet();
 
 /**
  * @brief Create link format of resources
@@ -424,8 +426,8 @@ int coap_handle_packet();
  *
  * @return 0 on success, or COAP_ERR_BUFFER_TOO_SMALL if buflen is exceeded.
  */
-int coap_make_link_format(const coap_resource_t *resources,
-                          char *buf, size_t buflen);
+coap_state_t coap_make_link_format(const coap_resource_t *resources,
+                                   char *buf, size_t buflen);
 
 #ifdef __cplusplus
 }

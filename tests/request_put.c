@@ -24,15 +24,15 @@ static int handle_request_put_response(const coap_resource_t *resource,
     printf("handle_request_put_response\n");
     if (rsppkt->hdr.t == COAP_TYPE_ACK) {
         printf("  ACK\n");
-        return COAP_STATE_RDY;
+        return COAP_RDY;
     }
     printf("  INVALID\n");
-    return COAP_STATE_ACK_WAIT;
+    return COAP_ACK_WAIT;
 }
 
 coap_resource_t resources[] =
 {
-    {COAP_STATE_RDY, COAP_METHOD_PUT, COAP_TYPE_CON,
+    {COAP_RDY, COAP_METHOD_PUT, COAP_TYPE_CON,
         handle_request_put_response, NULL,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_TXT_PLAIN)},
     {(coap_state_t)0, (coap_method_t)0, (coap_msgtype_t)0,
@@ -107,7 +107,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         printf("wait for response ...\n");
-        for (int state = COAP_STATE_ACK_WAIT; state != COAP_STATE_RDY; ) {
+        for (int state = COAP_ACK_WAIT; state != COAP_RDY; ) {
             n = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&cliaddr, &len);
             printf("received message of %d bytes\n", n);
             if (0 != (rc = coap_parse(buf, n, &rsp))) {

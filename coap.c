@@ -59,7 +59,7 @@ static void _option_nibble(const uint32_t value, uint8_t *nibble)
 }
 
 /* --- PUBLIC --------------------------------------------------------------- */
-int coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen)
+coap_state_t coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen)
 {
     // build header
     if (*buflen < (sizeof(coap_raw_header_t) + pkt->hdr.tkl)) {
@@ -128,10 +128,13 @@ int coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen)
     }
     return COAP_SUCCESS;
 }
-int coap_make_request(const uint16_t msgid, const coap_buffer_t* tok,
-                      const coap_resource_t *resource,
-                      const uint8_t *content, const size_t content_len,
-                      coap_packet_t *pkt)
+
+coap_state_t coap_make_request(const uint16_t msgid,
+                               const coap_buffer_t* tok,
+                               const coap_resource_t *resource,
+                               const uint8_t *content,
+                               const size_t content_len,
+                               coap_packet_t *pkt)
 {
     const coap_resource_path_t *path = resource->path;
     const coap_msgtype_t msg_type = resource->msg_type;
@@ -172,10 +175,10 @@ int coap_make_request(const uint16_t msgid, const coap_buffer_t* tok,
     // attach payload
     pkt->payload.p = content;
     pkt->payload.len = content_len;
-    return COAP_STATE_REQ_SEND;
+    return COAP_REQ_SEND;
 }
 
-int coap_make_ack(const coap_packet_t *inpkt, coap_packet_t *pkt)
+coap_state_t coap_make_ack(const coap_packet_t *inpkt, coap_packet_t *pkt)
 {
     printf("coap_make_ack\n");
     return coap_make_response(inpkt->hdr.id, &inpkt->tok,
@@ -183,12 +186,14 @@ int coap_make_ack(const coap_packet_t *inpkt, coap_packet_t *pkt)
                               NULL, NULL, 0, pkt);
 }
 
-int coap_make_response(const uint16_t msgid, const coap_buffer_t* tok,
-                       const coap_msgtype_t msgtype,
-                       const coap_responsecode_t rspcode,
-                       const uint8_t *content_type,
-                       const uint8_t *content, const size_t content_len,
-                       coap_packet_t *pkt)
+coap_state_t coap_make_response(const uint16_t msgid,
+                                const coap_buffer_t* tok,
+                                const coap_msgtype_t msgtype,
+                                const coap_responsecode_t rspcode,
+                                const uint8_t *content_type,
+                                const uint8_t *content,
+                                const size_t content_len,
+                                coap_packet_t *pkt)
 {
     pkt->hdr.ver = COAP_VERSION;
     pkt->hdr.t = msgtype;
@@ -211,13 +216,13 @@ int coap_make_response(const uint16_t msgid, const coap_buffer_t* tok,
     pkt->payload.p = content;
     pkt->payload.len = content_len;
     if ((msgtype == COAP_TYPE_ACK) && (rspcode == COAP_RSPCODE_EMPTY))
-        return COAP_STATE_ACK_SEND;
-    return COAP_STATE_RSP_SEND;
+        return COAP_ACK_SEND;
+    return COAP_RSP_SEND;
 }
 
-int coap_handle_request(coap_resource_t *resources,
-                        const coap_packet_t *inpkt,
-                        coap_packet_t *pkt)
+coap_state_t coap_handle_request(coap_resource_t *resources,
+                                 const coap_packet_t *inpkt,
+                                 coap_packet_t *pkt)
 {
     uint8_t count;
     coap_responsecode_t rspcode = COAP_RSPCODE_NOT_IMPLEMENTED;
@@ -235,7 +240,7 @@ int coap_handle_request(coap_resource_t *resources,
                 }
             }
             if (i == count) { // matching resource found
-                if ((inpkt->hdr.t == COAP_TYPE_CON) && (rs->msg_type != COAP_TYPE_ACK) && (rs->state != COAP_STATE_ACK_SEND)) { // no piggyback
+                if ((inpkt->hdr.t == COAP_TYPE_CON) && (rs->msg_type != COAP_TYPE_ACK) && (rs->state != COAP_ACK_SEND)) { // no piggyback
                     rs->state = coap_make_ack(inpkt, pkt);
                 }
                 else {
@@ -254,9 +259,9 @@ int coap_handle_request(coap_resource_t *resources,
                               NULL, NULL, 0, pkt);
 }
 
-int coap_handle_response(coap_resource_t *resources,
-                         const coap_packet_t *reqpkt,
-                         coap_packet_t *rsppkt)
+coap_state_t coap_handle_response(coap_resource_t *resources,
+                                  const coap_packet_t *reqpkt,
+                                  coap_packet_t *rsppkt)
 {
     if (reqpkt->hdr.id  != rsppkt->hdr.id )
         return COAP_ERR_REQUEST_MSGID_MISMATCH;
@@ -288,8 +293,8 @@ int coap_handle_response(coap_resource_t *resources,
     return COAP_ERR_REQUEST_NOT_FOUND;
 }
 
-int coap_make_link_format(const coap_resource_t *resources,
-                          char *buf, size_t buflen)
+coap_state_t coap_make_link_format(const coap_resource_t *resources,
+                                   char *buf, size_t buflen)
 {
     if (buflen < 4) { // <>;
         return COAP_ERR_BUFFER_TOO_SMALL;

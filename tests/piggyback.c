@@ -51,13 +51,13 @@ static int handle_get_separate(const coap_resource_t *resource,
 
 coap_resource_t resources[] =
 {
-    {COAP_STATE_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
+    {COAP_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
         handle_get_well_known_core, &path_well_known_core,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_APP_LINKFORMAT)},
-    {COAP_STATE_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
+    {COAP_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
         handle_get_piggyback, &path_piggyback,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_TXT_PLAIN)},
-    {COAP_STATE_RDY, COAP_METHOD_GET, COAP_TYPE_NONCON,
+    {COAP_RDY, COAP_METHOD_GET, COAP_TYPE_NONCON,
         handle_get_separate, &path_separate,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_TXT_PLAIN)},
     {(coap_state_t)0, (coap_method_t)0, (coap_msgtype_t)0,
@@ -94,7 +94,7 @@ int main(void)
             printf("Bad packet rc=%d\n", rc);
         }
         else {
-            for (int state = COAP_STATE_RSP_WAIT; state != COAP_STATE_RSP_SEND; ) {
+            for (int state = COAP_RSP_WAIT; state != COAP_RSP_SEND; ) {
                 size_t buflen = sizeof(buf);
                 coap_packet_t rsppkt;
                 state = coap_handle_request(resources, &pkt, &rsppkt);

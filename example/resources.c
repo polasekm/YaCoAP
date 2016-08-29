@@ -67,13 +67,13 @@ static int handle_put_light(const coap_resource_t *resource,
 
 coap_resource_t resources[] =
 {
-    {COAP_STATE_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
+    {COAP_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
         handle_get_well_known_core, &path_well_known_core,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_APP_LINKFORMAT)},
-    {COAP_STATE_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
+    {COAP_RDY, COAP_METHOD_GET, COAP_TYPE_ACK,
         handle_get_light, &path_light,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_TXT_PLAIN)},
-    {COAP_STATE_RDY, COAP_METHOD_PUT, COAP_TYPE_ACK,
+    {COAP_RDY, COAP_METHOD_PUT, COAP_TYPE_ACK,
         handle_put_light, &path_light,
         COAP_SET_CONTENTTYPE(COAP_CONTENTTYPE_NONE)},
     {(coap_state_t)0, (coap_method_t)0, (coap_msgtype_t)0,

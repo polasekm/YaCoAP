@@ -6,17 +6,23 @@
 #include "coap.h"
 
 /* --- PRIVATE -------------------------------------------------------------- */
-static int _parse_token(const uint8_t *buf, const size_t buflen,
-                        coap_packet_t *pkt);
-static int _parse_header(const uint8_t *buf, const size_t buflen,
-                         coap_header_t *hdr);
-static int _parse_options_payload(const uint8_t *buf, const size_t buflen,
-                                  coap_packet_t *pkt);
-static int _parse_option(const uint8_t **buf, const size_t buflen,
-                         coap_option_t *option, uint16_t *running_delta);
+static coap_state_t _parse_token(const uint8_t *buf,
+                                 const size_t buflen,
+                                 coap_packet_t *pkt);
+static coap_state_t _parse_header(const uint8_t *buf,
+                                  const size_t buflen,
+                                  coap_header_t *hdr);
+static coap_state_t _parse_options_payload(const uint8_t *buf,
+                                           const size_t buflen,
+                                           coap_packet_t *pkt);
+static coap_state_t _parse_option(const uint8_t **buf,
+                                  const size_t buflen,
+                                  coap_option_t *option,
+                                  uint16_t *running_delta);
 
-static int _parse_header(const uint8_t *buf, const size_t buflen,
-                         coap_header_t *hdr)
+static coap_state_t _parse_header(const uint8_t *buf,
+                                  const size_t buflen,
+                                  coap_header_t *hdr)
 {
     if (buflen < sizeof(coap_raw_header_t)) {
         return COAP_ERR_HEADER_TOO_SHORT;
@@ -34,8 +40,9 @@ static int _parse_header(const uint8_t *buf, const size_t buflen,
     return COAP_SUCCESS;
 }
 
-static int _parse_token(const uint8_t *buf, const size_t buflen,
-                        coap_packet_t *pkt)
+static coap_state_t _parse_token(const uint8_t *buf,
+                                 const size_t buflen,
+                                 coap_packet_t *pkt)
 {
     coap_buffer_t *tok = &pkt->tok;
     int toklen = pkt->hdr.tkl;
@@ -53,8 +60,10 @@ static int _parse_token(const uint8_t *buf, const size_t buflen,
     return COAP_SUCCESS;
 }
 
-static int _parse_option(const uint8_t **buf, const size_t buflen,
-                         coap_option_t *option, uint16_t *running_delta)
+static coap_state_t _parse_option(const uint8_t **buf,
+                                  const size_t buflen,
+                                  coap_option_t *option,
+                                  uint16_t *running_delta)
 {
     const uint8_t *p = *buf;
     uint8_t headlen = 1;
@@ -121,8 +130,9 @@ static int _parse_option(const uint8_t **buf, const size_t buflen,
 }
 
 // http://tools.ietf.org/html/rfc7252#section-3.1
-static int _parse_options_payload(const uint8_t *buf, const size_t buflen,
-                                  coap_packet_t *pkt)
+static coap_state_t _parse_options_payload(const uint8_t *buf,
+                                           const size_t buflen,
+                                           coap_packet_t *pkt)
 {
     size_t optionIndex = 0;
     uint16_t delta = 0;
@@ -155,7 +165,9 @@ static int _parse_options_payload(const uint8_t *buf, const size_t buflen,
 }
 
 /* --- PUBLIC --------------------------------------------------------------- */
-int coap_parse(const uint8_t *buf, const size_t buflen, coap_packet_t *pkt)
+coap_state_t coap_parse(const uint8_t *buf,
+                        const size_t buflen,
+                        coap_packet_t *pkt)
 {
     int rc;
     /* parse header, token, options, and payload */
