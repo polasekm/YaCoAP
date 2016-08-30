@@ -12,7 +12,7 @@
 static const coap_option_t *_find_options(const coap_packet_t *pkt,
                                           const coap_option_num_t num,
                                           uint8_t *count);
-static void _option_nibble(const uint32_t value, uint8_t *nibble);
+static void _option_decode(const uint32_t value, uint8_t *delta);
 
 /*
  * options are always stored consecutively,
@@ -45,16 +45,16 @@ static const coap_option_t *_find_options(const coap_packet_t *pkt,
 }
 
 /* https://tools.ietf.org/html/rfc7252#section-3.1 */
-static void _option_nibble(const uint32_t value, uint8_t *nibble)
+static void _option_decode(const uint32_t value, uint8_t *delta)
 {
     if (value < 13) {
-        *nibble = (0xFF & value);
+        *delta = (0xFF & value);
     }
     else if (value <= 0xFF+13) {
-        *nibble = 13;
+        *delta = 13;
     }
     else if (value <= 0xFFFF+269) {
-        *nibble = 14;
+        *delta = 14;
     }
 }
 
@@ -88,9 +88,9 @@ coap_state_t coap_build(const coap_packet_t *pkt, uint8_t *buf, size_t *buflen)
         }
         uint32_t optDelta = pkt->opts[i].num - running_delta;
         uint8_t delta = 0;
-        _option_nibble(optDelta, &delta);
+        _option_decode(optDelta, &delta);
         uint8_t len = 0;
-        _option_nibble((uint32_t)pkt->opts[i].buf.len, &len);
+        _option_decode((uint32_t)pkt->opts[i].buf.len, &len);
 
         *p++ = (0xFF & (delta << 4 | len));
         if (delta == 13) {
