@@ -5,7 +5,7 @@
 #include "coap.h"
 #include "coap_dump.h"
 
-#if MICROCOAP_DEBUG
+#if YACOAP_DEBUG
 
 static void _dump_header(const coap_header_t *hdr);
 static void _dump_options(const coap_option_t *opts, const size_t numopt);
@@ -56,4 +56,4 @@ void coap_dump_packet(const coap_packet_t *pkt)
     coap_dump(pkt->payload.p, pkt->payload.len, true);
     printf("\n");
 }
-#endif /* MICROCOAP_DEBUG */
+#endif /* YACOAP_DEBUG */

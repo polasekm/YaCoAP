@@ -1,4 +1,4 @@
-# microcoap
+# YaCoAP - Yet another CoAP library
 
 ## example
 

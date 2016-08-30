@@ -48,7 +48,7 @@ int main(void)
         coap_packet_t pkt;
 
         n = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&cliaddr, &len);
-#ifdef MICROCOAP_DEBUG
+#ifdef YACOAP_DEBUG
         printf("Received: ");
         coap_dump(buf, n, true);
         printf("\n");
@@ -60,7 +60,7 @@ int main(void)
         {
             size_t buflen = sizeof(buf);
             coap_packet_t rsppkt;
-#ifdef MICROCOAP_DEBUG
+#ifdef YACOAP_DEBUG
             coap_dump_packet(&pkt);
 #endif
             coap_handle_request(resources, &pkt, &rsppkt);
@@ -69,12 +69,12 @@ int main(void)
                 printf("coap_build failed rc=%d\n", rc);
             else
             {
-#ifdef MICROCOAP_DEBUG
+#ifdef YACOAP_DEBUG
                 printf("Sending: ");
                 coap_dump(buf, buflen, true);
                 printf("\n");
 #endif
-#ifdef MICROCOAP_DEBUG
+#ifdef YACOAP_DEBUG
                 coap_dump_packet(&rsppkt);
 #endif
 

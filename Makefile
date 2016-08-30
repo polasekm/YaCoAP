@@ -4,7 +4,7 @@ DIRS = example tests
 SRC = coap.c coap_dump.c coap_parse.c
 OBJ = $(SRC:%.c=%.o)
 DEPS = $(SRC:%.c=%.d)
-TARGET_LIB = libmicrocoap.so # target lib
+TARGET_LIB = libyacoap.so # target lib
 
 .PHONY: all
 all: ${TARGET_LIB}
