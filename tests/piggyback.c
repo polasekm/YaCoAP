@@ -90,7 +90,7 @@ int main(void)
         n = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&cliaddr, &len);
         printf("received message of %d bytes\n", n);
 
-        if (0 != (rc = coap_parse(buf, n, &pkt))) {
+        if ((rc = coap_parse(buf, n, &pkt)) > COAP_ERR) {
             printf("Bad packet rc=%d\n", rc);
         }
         else {
@@ -99,7 +99,7 @@ int main(void)
                 coap_packet_t rsppkt;
                 state = coap_handle_request(resources, &pkt, &rsppkt);
 
-                if (0 != (rc = coap_build(&rsppkt, buf, &buflen))) {
+                if ((rc = coap_build(&rsppkt, buf, &buflen)) > COAP_ERR) {
                     printf("coap_build failed rc=%d\n", rc);
                     break;
                 }

@@ -96,7 +96,7 @@ int main(int argc, char *argv[])
     coap_make_request(msgid, NULL, &resources[0], (uint8_t *)argv[3], strlen(argv[3]), &req);
     uint8_t buf[1024];
     size_t buflen = sizeof(buf);
-    if (0 != (rc = coap_build(&req, buf, &buflen))) {
+    if ((rc = coap_build(&req, buf, &buflen)) > COAP_ERR) {
         printf("coap_build failed rc=%d\n", rc);
         return 1;
     }
@@ -110,7 +110,7 @@ int main(int argc, char *argv[])
         for (int state = COAP_ACK_WAIT; state != COAP_RDY; ) {
             n = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&cliaddr, &len);
             printf("received message of %d bytes\n", n);
-            if (0 != (rc = coap_parse(buf, n, &rsp))) {
+            if ((rc = coap_parse(buf, n, &rsp)) > COAP_ERR) {
                 printf("Bad packet rc=%d\n", rc);
                 return 1;
             }
