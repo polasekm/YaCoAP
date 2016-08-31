@@ -24,7 +24,7 @@ static int handle_get_well_known_core(const coap_resource_t *resource,
     (void) reqpkt;
     printf("handle_get_well_known_core\n");
     printf("  content: %.*s\n", (int)rsppkt->payload.len, (char *)rsppkt->payload.p);
-    return COAP_RDY;
+    return COAP_RSP_RECV;
 }
 
 coap_resource_t resources[] =
@@ -88,7 +88,7 @@ int main(int argc, char *argv[])
             return 1;
         }
         printf("wait for response ...\n");
-        for (int state = COAP_RSP_WAIT; state != COAP_RDY; ) {
+        for (int state = COAP_RSP_WAIT; state != COAP_RSP_RECV; ) {
             n = recvfrom(fd, buf, sizeof(buf), 0, (struct sockaddr *)&cliaddr, &len);
             printf("received message of %d bytes\n", n);
             if ((rc = coap_parse(buf, n, &rsp)) > COAP_ERR) {

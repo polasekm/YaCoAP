@@ -122,6 +122,7 @@ typedef enum
     COAP_OPTION_PROXY_URI       = 35,
     COAP_OPTION_PROXY_SCHEME    = 39,
     COAP_OPTION_SIZE1           = 60,
+    COAP_OPTION_NO_RESPONSE     = 258,
 } coap_option_num_t;
 
 /**
@@ -413,8 +414,6 @@ coap_state_t coap_handle_request(coap_resource_t *resources,
 coap_state_t coap_handle_response(coap_resource_t *resources,
                                   const coap_packet_t *reqpkt,
                                   coap_packet_t *rsppkt);
-
-coap_state_t coap_handle_packet();
 
 /**
  * @brief Create link format of resources
