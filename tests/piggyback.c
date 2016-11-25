@@ -19,7 +19,7 @@ static int handle_get_well_known_core(const coap_resource_t *resource,
     return coap_make_response(inpkt->hdr.id, &inpkt->tok,
                               COAP_TYPE_ACK, COAP_RSPCODE_CONTENT,
                               resource->content_type,
-                              (const uint8_t *)RIOT_BOARD, strlen(RIOT_BOARD),
+                              (const uint8_t *)rsp, strlen(rsp),
                               pkt);
 }
 
