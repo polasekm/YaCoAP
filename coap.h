@@ -246,7 +246,8 @@ typedef enum {
 ///////////////////////
 
 #ifndef COAP_MAX_PATHITEMS
-#define COAP_MAX_PATHITEMS 2  //!< number of path elements
+//#define COAP_MAX_PATHITEMS 2  //!< number of path elements
+#define COAP_MAX_PATHITEMS 7  //!< number of path elements
 #endif
 /**
  * Describes the path elements of a CoAP resource

@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
-#include <arpa/inet.h>
+//#include <arpa/inet.h>
+
+//dopneno protoze nejsou zapnuty sockety a include vyse nebude obsahovat potrebne fce
+//#include "lwip/inet.h"
+#include "inet.h"
 
 #include "coap.h"
 
