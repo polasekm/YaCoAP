@@ -41,7 +41,7 @@ typedef union {
     uint8_t raw;
     struct {
         uint8_t tkl     : 4;
-        uint8_t t       : 2;
+        uint8_t t       : 2; //coap_msgtype_t
         uint8_t ver     : 2;
         uint8_t code;
         uint16_t id;
@@ -306,6 +306,10 @@ struct coap_resource
  */
 #define COAP_GET_CONTENTTYPE(buf)   ((int16_t) ((int16_t)buf[0] << 8) | buf[1])
 
+const coap_option_t *_find_options(const coap_packet_t *pkt,
+                                   const coap_option_num_t num,
+                                   uint8_t *count);
+
 /**
  * @brief Parse CoAP packet/message from transmission buffer
  *
@@ -366,6 +370,8 @@ coap_state_t coap_make_request(const uint16_t msgid, const coap_buffer_t* tok,
                                const coap_resource_t *resource,
                                const uint8_t *content, const size_t content_len,
                                coap_packet_t *pkt);
+
+coap_state_t coap_add_option(coap_packet_t *pkt, uint8_t optnum, uint8_t *optdata, size_t optlen);
 
 /**
  * @brief Create a CoAP response packet

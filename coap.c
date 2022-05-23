@@ -13,18 +13,18 @@
 #include "coap.h"
 
 /* --- PRIVATE -------------------------------------------------------------- */
-static const coap_option_t *_find_options(const coap_packet_t *pkt,
-                                          const coap_option_num_t num,
-                                          uint8_t *count);
+const coap_option_t *_find_options(const coap_packet_t *pkt,
+                                   const coap_option_num_t num,
+                                   uint8_t *count);
 static void _option_decode(const uint32_t value, uint8_t *delta);
 
 /*
  * options are always stored consecutively,
  * so can return a block with same option num
  */
-static const coap_option_t *_find_options(const coap_packet_t *pkt,
-                                          const coap_option_num_t num,
-                                          uint8_t *count)
+const coap_option_t *_find_options(const coap_packet_t *pkt,
+                                   const coap_option_num_t num,
+                                   uint8_t *count)
 {
     const coap_option_t * first = NULL;
     /* loop through packet opts */
@@ -180,6 +180,24 @@ coap_state_t coap_make_request(const uint16_t msgid,
     pkt->payload.p = content;
     pkt->payload.len = content_len;
     return COAP_REQ_SEND;
+}
+
+coap_state_t coap_add_option(coap_packet_t *pkt, uint8_t optnum, uint8_t *optdata, size_t optlen)
+{
+    int i;
+    if (pkt->numopts>=COAP_MAX_OPTIONS)
+        return COAP_ERR_OPTION_NOT_FOUND;
+    for (i=pkt->numopts; i>0; i--)
+    {
+        if (pkt->opts[i-1].num<=optnum)
+            break;
+        pkt->opts[i]=pkt->opts[i-1];
+    }
+    pkt->opts[i].num=optnum;
+    pkt->opts[i].buf.p=optdata;
+    pkt->opts[i].buf.len=optlen;
+    pkt->numopts++;
+    return COAP_SUCCESS;
 }
 
 coap_state_t coap_make_ack(const coap_packet_t *inpkt, coap_packet_t *pkt)
